@@ -48,19 +48,15 @@ struct ContentView: View {
                     timerisOn = false
                     timer?.invalidate()
                     sec = initSec
-                    
                 } else {
                     timerisOn = true
-                    sec = initSec
                     timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: {_ in
                         sec -= 0.1
                         if sec < 0.01 {
                             sec = initSec
                             let soundIdBell:SystemSoundID = 1000
-                            
                             AudioServicesPlaySystemSound(soundIdBell)
                         }
-                        
                     })
                 }
             }){
