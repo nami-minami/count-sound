@@ -14,61 +14,74 @@ struct ContentView: View {
     @State private var initSec: Float = 0
     @State private var timerisOn: Bool = false
     @State private var timer: Timer? = Timer()
+    @State private var settingViewisActive: Bool = false
     @FocusState private var textfieldisFocus: Bool
     
     var body: some View {
-        VStack {
-            TextField("sec", value: $sec, format: .number.precision(.fractionLength(1)))
-                .multilineTextAlignment(TextAlignment.center)
-                .font(.largeTitle)
-                .frame(width: 150.0, height: 50.0)
-                .keyboardType(.numberPad)
-                .focused($textfieldisFocus)
-                .toolbar {
-                    ToolbarItemGroup(placement: .keyboard) {
-                        Spacer()
-                        Button("Done") {
-                            textfieldisFocus = false
+        NavigationStack {
+            ZStack {
+                NavigationLink(destination: SettingMenuView(), label: {
+                    Image(systemName: "gear")
+                    Text("Settings")
+                }).frame(maxWidth: 350,
+                         maxHeight: 745,
+                         alignment: .topLeading)
+                
+                VStack {
+                    TextField("sec", value: $sec, format: .number.precision(.fractionLength(1)))
+                        .multilineTextAlignment(TextAlignment.center)
+                        .font(.largeTitle)
+                        .frame(width: 150.0, height: 50.0)
+                        .keyboardType(.numberPad)
+                        .focused($textfieldisFocus)
+                        .onSubmit {
                             initSec = sec
                         }
-                        .font(.title3)
-                    }
-                }
-                .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)){ obj in
-                    if let textField = obj.object as? UITextField {
-                        textField.selectedTextRange = textField.textRange(
-                            from: textField.beginningOfDocument,
-                            to: textField.endOfDocument
-                        )
-                    }
-                }
-            
-            Button(action: {
-                if timerisOn {
-                    timerisOn = false
-                    timer?.invalidate()
-                    sec = initSec
-                } else {
-                    timerisOn = true
-                    timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: {_ in
-                        sec -= 0.1
-                        if sec < 0.01 {
-                            sec = initSec
-                            let soundIdBell:SystemSoundID = 1000
-                            AudioServicesPlaySystemSound(soundIdBell)
+                        .toolbar {
+                            ToolbarItemGroup(placement: .keyboard) {
+                                Spacer()
+                                Button("Done") {
+                                    textfieldisFocus = false
+                                    initSec = sec
+                                }
+                                .font(.title3)
+                            }
                         }
-                    })
+                        .onReceive(NotificationCenter.default.publisher(for: UITextField.textDidBeginEditingNotification)){ obj in
+                            if let textField = obj.object as? UITextField {
+                                textField.selectedTextRange = textField.textRange(
+                                    from: textField.beginningOfDocument,
+                                    to: textField.endOfDocument
+                                )
+                            }
+                        }
+                    
+                    Button(action: {
+                        if timerisOn {
+                            timerisOn = false
+                            timer?.invalidate()
+                            sec = initSec
+                        } else {
+                            timerisOn = true
+                            timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: {_ in
+                                sec -= 0.1
+                                if sec < 0.01 {
+                                    sec = initSec
+                                    let soundIdBell: SystemSoundID = 1000
+                                    AudioServicesPlaySystemSound(soundIdBell)
+                                }
+                            })
+                        }
+                    }){
+                        Text(timerisOn ? "Stop" : "Start")
+                            .font(.largeTitle)
+                            .frame(width: 100.0, height: 60.0)
+                            .tint(.white)
+                            .background(timerisOn ? .red : .blue)
+                    }
                 }
-            }){
-                Text(timerisOn ? "Stop" : "Start")
-                    .font(.largeTitle)
-                    .frame(width: 100.0, height: 60.0)
-                    .tint(.white)
-                    .background(timerisOn ? .red : .blue)
             }
         }
-        .padding()
-        
     }
 }
     
@@ -78,4 +91,5 @@ struct ContentView_Previews: PreviewProvider {
             .previewDevice("iPhone 14")
     }
 }
+
 
